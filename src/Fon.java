@@ -1,6 +1,6 @@
-
 public class Fon {
-	public static void main(String[] args) throws Exception {
-        System.out.println("Hello, fon asdfasdf!");
+	public static void fon() {
+        System.out.println("Hello, Pho0m !");
     }
 }
+
