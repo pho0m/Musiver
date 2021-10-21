@@ -11,4 +11,4 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '16'
-      - run: java -cp java HelloWorldApp
+      - run: java -cp java Main
