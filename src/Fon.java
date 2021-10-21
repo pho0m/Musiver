@@ -1,6 +1,5 @@
-
 public class Fon {
-	public static void main(String[] args) throws Exception {
-        System.out.println("Hello, World!");
+	public static void fonnajaaa() {
+        System.out.println("Hello, Pho0m !");
     }
 }
