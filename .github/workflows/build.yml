@@ -3,13 +3,24 @@ name: build
 on: [push]
 
 jobs:
-  build:
+  publish:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-java@v2
+      - uses: actions/setup-java@v1
         with:
-          distribution: 'adopt'
-          java-version: '16'
-          check-latest: true
-      - run: java -cp java Main
+          java-version: 11
+          settings-path: ".m2/"
+      - uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
+      - name: Copying target jar
+        run: |
+          mkdir myTarget
+          cp target/*.jar myTarget
+      - name: Uploading jar
+        uses: actions/upload-artifact@v2
+        with:
+          name: myPackage
+          path: myTarget
