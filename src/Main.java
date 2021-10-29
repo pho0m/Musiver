@@ -13,6 +13,7 @@ public class Main extends Application {
     stage.setScene(scene);
     stage.show();
     stage.setResizable(false);
+    stage.setTitle("Musiver TCT31");
   }
 
   public static void main(String[] args) {
