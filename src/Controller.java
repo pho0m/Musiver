@@ -61,14 +61,21 @@ public class Controller implements Initializable {
 
         if (e.getClickCount() == 2) {
             songNumber = musicList.getSelectionModel().getSelectedIndex();
+
+            if (mediaPlayer != null) {
+                mediaPlayer.stop();
+
+                if (running) {
+                    cancelTimer();
+                }
+            }
+
             media = new Media(songs.get(songNumber).toURI().toString());
             mediaPlayer = new MediaPlayer(media);
             songLabel.setText(songs.get(songNumber).getName());
-
-            System.out.println("clicked on " + musicList.getSelectionModel().getSelectedItem());
             playMedia();
 
-            System.out.println();
+            System.out.println("clicked on " + musicList.getSelectionModel().getSelectedItem());
         }
     }
 
