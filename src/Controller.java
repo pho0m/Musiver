@@ -26,20 +26,17 @@ public class Controller implements Initializable {
     @FXML
     private Pane pane;
     @FXML
-    private Label songLabel;
+    private Label musicLabel;
     @FXML
-    private Button playButton, pauseButton, resetButton, previousButton, nextButton;
+    private Button playButton, pauseButton, previousButton, nextButton, shuffleButton, loopButton;
     @FXML
     private ComboBox<String> speedBox;
     @FXML
     private Slider volumeSlider;
     @FXML
     private ProgressBar songProgressBar;
-
     @FXML
     private ListView<String> musicList;
-
-    String[] test = { "lorem ipsum", "expectto", "mariposa" };
 
     private Media media;
     private MediaPlayer mediaPlayer;
@@ -47,9 +44,9 @@ public class Controller implements Initializable {
     private File directory;
     private File[] files;
 
-    private ArrayList<File> songs;
+    private ArrayList<File> music;
 
-    private int songNumber;
+    private int musicNumber;
     private int[] speeds = { 25, 50, 75, 100, 125, 150, 175, 200 };
 
     private Timer timer;
@@ -60,7 +57,7 @@ public class Controller implements Initializable {
     public void handleMouseClick(MouseEvent e) {
 
         if (e.getClickCount() == 2) {
-            songNumber = musicList.getSelectionModel().getSelectedIndex();
+            musicNumber = musicList.getSelectionModel().getSelectedIndex();
 
             if (mediaPlayer != null) {
                 mediaPlayer.stop();
@@ -70,9 +67,9 @@ public class Controller implements Initializable {
                 }
             }
 
-            media = new Media(songs.get(songNumber).toURI().toString());
+            media = new Media(music.get(musicNumber).toURI().toString());
             mediaPlayer = new MediaPlayer(media);
-            songLabel.setText(songs.get(songNumber).getName());
+            musicLabel.setText(music.get(musicNumber).getName());
             playMedia();
 
             System.out.println("clicked on " + musicList.getSelectionModel().getSelectedItem());
@@ -82,13 +79,13 @@ public class Controller implements Initializable {
     @Override
     public void initialize(URL arg0, ResourceBundle arg1) {
 
-        songs = new ArrayList<File>();
+        music = new ArrayList<File>();
         directory = new File("music");
         files = directory.listFiles();
 
         if (files != null) {
             for (File file : files) {
-                songs.add(file);
+                music.add(file);
             }
         }
 
@@ -127,60 +124,68 @@ public class Controller implements Initializable {
         mediaPlayer.pause();
     }
 
-    public void resetMedia() {
+    public void stopMedia() {
         songProgressBar.setProgress(0);
         mediaPlayer.seek(Duration.seconds(0));
     }
 
     public void previousMedia() {
-        if (songNumber > 0) {
-            songNumber--;
+        if (musicNumber > 0) {
+            musicNumber--;
             mediaPlayer.stop();
 
             if (running) {
                 cancelTimer();
             }
-            media = new Media(songs.get(songNumber).toURI().toString());
+            media = new Media(music.get(musicNumber).toURI().toString());
             mediaPlayer = new MediaPlayer(media);
-            songLabel.setText(songs.get(songNumber).getName());
+            musicLabel.setText(music.get(musicNumber).getName());
             playMedia();
 
         } else {
-            songNumber = songs.size() - 1;
+            musicNumber = music.size() - 1;
             mediaPlayer.stop();
 
             if (running) {
                 cancelTimer();
             }
-            media = new Media(songs.get(songNumber).toURI().toString());
+            media = new Media(music.get(musicNumber).toURI().toString());
             mediaPlayer = new MediaPlayer(media);
-            songLabel.setText(songs.get(songNumber).getName());
+            musicLabel.setText(music.get(musicNumber).getName());
             playMedia();
         }
     }
 
     public void nextMedia() {
 
-        if (songNumber < songs.size() - 1) {
-            songNumber++;
+        if (musicNumber < music.size() - 1) {
+            musicNumber++;
             mediaPlayer.stop();
 
             if (running) {
                 cancelTimer();
             }
-            media = new Media(songs.get(songNumber).toURI().toString());
+            media = new Media(music.get(musicNumber).toURI().toString());
             mediaPlayer = new MediaPlayer(media);
-            songLabel.setText(songs.get(songNumber).getName());
+            musicLabel.setText(music.get(musicNumber).getName());
             playMedia();
 
         } else {
-            songNumber = 0;
+            musicNumber = 0;
             mediaPlayer.stop();
-            media = new Media(songs.get(songNumber).toURI().toString());
+            media = new Media(music.get(musicNumber).toURI().toString());
             mediaPlayer = new MediaPlayer(media);
-            songLabel.setText(songs.get(songNumber).getName());
+            musicLabel.setText(music.get(musicNumber).getName());
             playMedia();
         }
+    }
+
+    public void shuffleMedia() {
+        System.out.println("Shuffle WIP");
+    }
+
+    public void loopMedia() {
+        System.out.println("Shuffle WIP");
     }
 
     public void changeSpeed(ActionEvent event) {
