@@ -76,8 +76,8 @@
       <Label fx:id="musicStartDuration" alignment="CENTER" layoutX="30.0" layoutY="136.0" prefHeight="25.0" prefWidth="35.0" text="00:00" textFill="WHITE" />
       <Label fx:id="musicStopDuration" alignment="CENTER" contentDisplay="RIGHT" layoutX="467.0" layoutY="136.0" prefHeight="25.0" prefWidth="35.0" text="00:00" textFill="WHITE" />
       <ListView fx:id="musicList" onMouseClicked="#handleMouseClick" layoutX="10.0" layoutY="234.0"  prefHeight="260.0" prefWidth="513.0" />
-      <Label fx:id="musicStartDuration1" alignment="CENTER" layoutX="355.0" layoutY="168.0" prefHeight="25.0" prefWidth="57.0" text="Volumn" textFill="WHITE" />
-      <Label fx:id="songLabel1" alignment="TOP_LEFT" graphicTextGap="10.0" layoutX="18.0" layoutY="86.0" prefHeight="39.0" prefWidth="369.0" text="Artist" textFill="WHITE">
+      <Label fx:id="volumn" alignment="CENTER" layoutX="355.0" layoutY="168.0" prefHeight="25.0" prefWidth="57.0" text="Volumn" textFill="WHITE" />
+      <Label fx:id="musicArtist" alignment="TOP_LEFT" graphicTextGap="10.0" layoutX="18.0" layoutY="86.0" prefHeight="39.0" prefWidth="369.0" text="Artist" textFill="WHITE">
          <font>
             <Font size="21.0" />
          </font>

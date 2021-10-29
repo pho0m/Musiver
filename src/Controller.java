@@ -26,7 +26,7 @@ public class Controller implements Initializable {
     @FXML
     private Pane pane;
     @FXML
-    private Label musicLabel;
+    private Label musicLabel, musicArtist, musicStartDuration, musicStopDuration;
     @FXML
     private Button playButton, pauseButton, previousButton, nextButton, shuffleButton, loopButton;
     @FXML
@@ -53,6 +53,7 @@ public class Controller implements Initializable {
     private TimerTask task;
 
     private boolean running;
+    private Thread th;
 
     public void handleMouseClick(MouseEvent e) {
 
@@ -66,6 +67,7 @@ public class Controller implements Initializable {
                     cancelTimer();
                 }
             }
+            // double endOfMusic = mediaPlayer.getStopTime().toMinutes(); //FIXME
 
             media = new Media(music.get(musicNumber).toURI().toString());
             mediaPlayer = new MediaPlayer(media);
@@ -181,11 +183,11 @@ public class Controller implements Initializable {
     }
 
     public void shuffleMedia() {
-        System.out.println("Shuffle WIP");
+        System.out.println("Shuffle feature WIP"); // FIXME
     }
 
     public void loopMedia() {
-        System.out.println("Shuffle WIP");
+        System.out.println("Loop feature WIP");// FIXME
     }
 
     public void changeSpeed(ActionEvent event) {
@@ -204,18 +206,35 @@ public class Controller implements Initializable {
         task = new TimerTask() {
 
             public void run() {
+
                 running = true;
                 double current = mediaPlayer.getCurrentTime().toSeconds();
                 double end = media.getDuration().toSeconds();
                 songProgressBar.setProgress(current / end);
                 // set duration time
                 // FIXME
+
+                // ShowTime(current, end);
                 if (current / end == 1) {
                     cancelTimer();
                 }
             }
         };
         timer.scheduleAtFixedRate(task, 0, 1000);
+    }
+
+    public void ShowTime(double current, double end) {
+        try {
+            do {
+                current = mediaPlayer.getCurrentTime().toSeconds();
+                end = media.getDuration().toSeconds();
+                musicStartDuration.setText(current + " : ");
+                musicStopDuration.setText(" : " + end);
+
+                Thread.sleep(1000); // 1000 = 1 second
+            } while (th.isAlive());
+        } catch (Exception e) {
+        }
     }
 
     public void cancelTimer() {
