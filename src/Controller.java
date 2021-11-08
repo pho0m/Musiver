@@ -53,7 +53,6 @@ public class Controller implements Initializable {
     private TimerTask task;
 
     private boolean running;
-    private Thread th;
 
     public void handleMouseClick(MouseEvent e) {
 
@@ -206,35 +205,20 @@ public class Controller implements Initializable {
         task = new TimerTask() {
 
             public void run() {
-
                 running = true;
                 double current = mediaPlayer.getCurrentTime().toSeconds();
                 double end = media.getDuration().toSeconds();
                 songProgressBar.setProgress(current / end);
+
                 // set duration time
                 // FIXME
 
-                // ShowTime(current, end);
                 if (current / end == 1) {
                     cancelTimer();
                 }
             }
         };
         timer.scheduleAtFixedRate(task, 0, 1000);
-    }
-
-    public void ShowTime(double current, double end) {
-        try {
-            do {
-                current = mediaPlayer.getCurrentTime().toSeconds();
-                end = media.getDuration().toSeconds();
-                musicStartDuration.setText(current + " : ");
-                musicStopDuration.setText(" : " + end);
-
-                Thread.sleep(1000); // 1000 = 1 second
-            } while (th.isAlive());
-        } catch (Exception e) {
-        }
     }
 
     public void cancelTimer() {
