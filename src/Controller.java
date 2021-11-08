@@ -48,7 +48,7 @@ public class Controller implements Initializable {
     @FXML
     private Slider volumeSlider;
     @FXML
-    private ProgressBar songProgressBar;
+    private ProgressBar musicProgressBar;
     @FXML
     private ListView<String> musicList;
     @FXML
@@ -108,7 +108,7 @@ public class Controller implements Initializable {
         fitWidth = 30;
         fitHeight = 30;
         loop = false;
-        songProgressBar.setStyle("-fx-accent: #000080;");
+        musicProgressBar.setStyle("-fx-accent: #000080;");
     }
 
     public void handleMouseClick(MouseEvent e) {
@@ -154,7 +154,7 @@ public class Controller implements Initializable {
                     mediaPlayer.setOnEndOfMedia(new Runnable() {
                         public void run() {
                             if (loop == true) {
-                                songProgressBar.setProgress(0);
+                                musicProgressBar.setProgress(0);
                                 mediaPlayer.seek(Duration.seconds(0));
                                 mediaPlayer.play();
 
@@ -318,8 +318,27 @@ public class Controller implements Initializable {
         }
     }
 
+    public void musicProgressBarClick(MouseEvent e) {
+
+        try {
+            double dx = e.getX();
+            double dwidth = musicProgressBar.getWidth();
+            double progression = (dx / dwidth);
+            double milliseconds = (progression * mediaPlayer.getTotalDuration().toMillis());
+            Duration duration = new Duration(milliseconds);
+
+            musicProgressBar.setProgress(progression);
+            mediaPlayer.seek(duration);
+            mediaPlayer.play();
+
+        } catch (Exception e7) {
+            alertError("No Music in Queue", "Please double click to select in list of music !");
+
+        }
+    }
+
     public void stopMedia() {
-        songProgressBar.setProgress(0);
+        musicProgressBar.setProgress(0);
         mediaPlayer.seek(Duration.seconds(0));
     }
 
@@ -348,10 +367,7 @@ public class Controller implements Initializable {
                 running = true;
                 double current = mediaPlayer.getCurrentTime().toSeconds();
                 double end = media.getDuration().toSeconds();
-                songProgressBar.setProgress(current / end);
-
-                // set duration time
-                // FIXME
+                musicProgressBar.setProgress(current / end);
 
                 if (current / end == 1) {
                     cancelTimer();
@@ -378,13 +394,6 @@ public class Controller implements Initializable {
 
                 title = id3v2Tag.getTitle();
                 artist = id3v2Tag.getArtist();
-
-                System.out.println("========================================");
-                System.out.println("Artist: " + id3v2Tag.getArtist());
-                System.out.println("Title: " + id3v2Tag.getTitle());
-                System.out.println("Album: " + id3v2Tag.getAlbum());
-                System.out.println("Year: " + id3v2Tag.getYear());
-                System.out.println("========================================");
 
                 byte[] albumImageData = id3v2Tag.getAlbumImage();
                 if (albumImageData != null) {
