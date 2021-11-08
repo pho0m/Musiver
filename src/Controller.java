@@ -130,8 +130,6 @@ public class Controller implements Initializable {
             musicLabel.setText(title);
             artistLabel.setText(artist);
             playMedia();
-
-            System.out.println("clicked on " + musicList.getSelectionModel().getSelectedItem());
         }
     }
 
@@ -433,7 +431,6 @@ public class Controller implements Initializable {
     }
 
     public void musicDetails(int musicNumber) {
-        System.out.println("music number : " + musicNumber);
         Mp3File mp3file;
         ID3v2 id3v2Tag;
 
@@ -459,8 +456,6 @@ public class Controller implements Initializable {
                     musicImage.setFitWidth(166);
                     musicImage.setFitHeight(167);
 
-                    System.out.println("Have album image data, length: " + albumImageData.length + " bytes");
-                    System.out.println("Album image mime type: " + id3v2Tag.getAlbumImageMimeType());
                 } else {
                     javafx.scene.image.Image image = new javafx.scene.image.Image(
                             getClass().getResource("icons/music-placeholder.png").toExternalForm());
@@ -469,7 +464,6 @@ public class Controller implements Initializable {
                     musicImage.setPreserveRatio(true);
                     musicImage.setImage(image);
                 }
-
             }
 
         } catch (UnsupportedTagException | InvalidDataException | IOException ex) {
