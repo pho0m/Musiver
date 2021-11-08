@@ -16,6 +16,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Slider;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.media.Media;
@@ -28,7 +29,7 @@ public class Controller implements Initializable {
     @FXML
     private Label musicLabel, musicArtist, musicStartDuration, musicStopDuration;
     @FXML
-    private Button playButton, pauseButton, previousButton, nextButton, shuffleButton, loopButton;
+    private Button playButton, previousButton, nextButton, shuffleButton, loopButton;
     @FXML
     private ComboBox<String> speedBox;
     @FXML
@@ -66,13 +67,19 @@ public class Controller implements Initializable {
                     cancelTimer();
                 }
             }
-            // double endOfMusic = mediaPlayer.getStopTime().toMinutes(); //FIXME
+
+            javafx.scene.image.Image image = new javafx.scene.image.Image(
+                    getClass().getResource("icons/pause.png").toExternalForm());
+            ImageView iv = new ImageView(image);
+            iv.setFitHeight(40);
+            iv.setFitWidth(40);
+
+            playButton.setGraphic(iv);
 
             media = new Media(music.get(musicNumber).toURI().toString());
             mediaPlayer = new MediaPlayer(media);
             musicLabel.setText(music.get(musicNumber).getName());
             playMedia();
-
             System.out.println("clicked on " + musicList.getSelectionModel().getSelectedItem());
         }
     }
@@ -114,15 +121,30 @@ public class Controller implements Initializable {
     }
 
     public void playMedia() {
-        beginTimer();
-        changeSpeed(null);
-        mediaPlayer.setVolume(volumeSlider.getValue() * 0.01);
-        mediaPlayer.play();
-    }
+        if (running == false) {
+            javafx.scene.image.Image image = new javafx.scene.image.Image(
+                    getClass().getResource("icons/pause.png").toExternalForm());
+            ImageView iv = new ImageView(image);
+            iv.setFitHeight(40);
+            iv.setFitWidth(40);
+            playButton.setGraphic(iv);
 
-    public void pauseMedia() {
-        cancelTimer();
-        mediaPlayer.pause();
+            beginTimer();
+            changeSpeed(null);
+            mediaPlayer.setVolume(volumeSlider.getValue() * 0.01);
+            mediaPlayer.play();
+
+        } else {
+            javafx.scene.image.Image image = new javafx.scene.image.Image(
+                    getClass().getResource("icons/play.png").toExternalForm());
+            ImageView iv = new ImageView(image);
+            iv.setFitHeight(40);
+            iv.setFitWidth(40);
+            playButton.setGraphic(iv);
+
+            cancelTimer();
+            mediaPlayer.pause();
+        }
     }
 
     public void stopMedia() {
