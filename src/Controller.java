@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.ResourceBundle;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -130,6 +131,206 @@ public class Controller implements Initializable {
         }
     }
 
+    public void playMedia() {
+        try {
+            if (mediaPlayer != null) {
+                if (running == false) {
+                    javafx.scene.image.Image image = new javafx.scene.image.Image(
+                            getClass().getResource("icons/pause.png").toExternalForm());
+                    ImageView iv = new ImageView(image);
+                    iv.setFitHeight(40);
+                    iv.setFitWidth(40);
+                    playButton.setGraphic(iv);
+
+                    beginTimer();
+                    changeSpeed(null);
+                    mediaPlayer.setVolume(volumeSlider.getValue() * 0.01);
+                    mediaPlayer.play();
+
+                } else {
+                    javafx.scene.image.Image image = new javafx.scene.image.Image(
+                            getClass().getResource("icons/play.png").toExternalForm());
+                    ImageView iv = new ImageView(image);
+                    iv.setFitHeight(40);
+                    iv.setFitWidth(40);
+                    playButton.setGraphic(iv);
+
+                    cancelTimer();
+                    mediaPlayer.pause();
+                }
+
+            } else {
+                alertError("No Music in Queue", "Please double click to select in list of music !");
+            }
+
+        } catch (Exception e) {
+            alertError("No Music in Queue", "Please double click to select in list of music !");
+        }
+    }
+
+    public void previousMedia() {
+        if (mediaPlayer != null) {
+            if (musicNumber > 0) {
+                musicNumber--;
+
+                mediaPlayer.stop();
+
+                if (running) {
+                    cancelTimer();
+                }
+                media = new Media(music.get(musicNumber).toURI().toString());
+                mediaPlayer = new MediaPlayer(media);
+
+                musicDetails(musicNumber);
+                setSelection(musicNumber);
+
+                musicLabel.setText(title);
+                artistLabel.setText(artist);
+
+                playMedia();
+
+            } else {
+                musicNumber = music.size() - 1;
+                mediaPlayer.stop();
+
+                if (running) {
+                    cancelTimer();
+                }
+                media = new Media(music.get(musicNumber).toURI().toString());
+                mediaPlayer = new MediaPlayer(media);
+
+                musicDetails(musicNumber);
+                setSelection(musicNumber);
+
+                musicLabel.setText(title);
+                artistLabel.setText(artist);
+
+                playMedia();
+            }
+        } else {
+            alertError("No Music in Queue", "Please double click to select in list of music !");
+        }
+    }
+
+    public void nextMedia() {
+        if (mediaPlayer != null) {
+            if (musicNumber < music.size() - 1) {
+                musicNumber++;
+                mediaPlayer.stop();
+
+                if (running) {
+                    cancelTimer();
+                }
+                media = new Media(music.get(musicNumber).toURI().toString());
+                mediaPlayer = new MediaPlayer(media);
+
+                musicDetails(musicNumber);
+                setSelection(musicNumber);
+
+                musicLabel.setText(title);
+                artistLabel.setText(artist);
+
+                playMedia();
+
+            } else {
+                musicNumber = 0;
+                mediaPlayer.stop();
+                media = new Media(music.get(musicNumber).toURI().toString());
+                mediaPlayer = new MediaPlayer(media);
+
+                musicDetails(musicNumber);
+                setSelection(musicNumber);
+
+                musicLabel.setText(title);
+                artistLabel.setText(artist);
+
+                playMedia();
+            }
+        } else {
+            alertError("No Music in Queue", "Please double click to select in list of music !");
+        }
+    }
+
+    public void shuffleMedia() {
+        int rnd = new Random().nextInt(music.size());
+        musicNumber = rnd;
+
+        if (mediaPlayer != null) {
+            if (mediaPlayer != null) {
+                mediaPlayer.stop();
+
+                if (running) {
+                    cancelTimer();
+                }
+            }
+
+            media = new Media(music.get(musicNumber).toURI().toString());
+            mediaPlayer = new MediaPlayer(media);
+
+            musicDetails(musicNumber);
+            setSelection(musicNumber);
+
+            musicLabel.setText(title);
+            artistLabel.setText(artist);
+            playMedia();
+
+        } else {
+            alertError("No Music in Queue", "Please double click to select in list of music !");
+        }
+    }
+
+    public void loopMedia() {
+        System.out.println("Loop feature WIP");// FIXME
+    }
+
+    public void stopMedia() {
+        songProgressBar.setProgress(0);
+        mediaPlayer.seek(Duration.seconds(0));
+    }
+
+    public void setSelection(int musicNumber) {
+        musicList.getSelectionModel().select(musicNumber);
+        musicList.getFocusModel().focus(musicNumber);
+        musicList.scrollTo(musicNumber);
+    }
+
+    public void changeSpeed(ActionEvent event) {
+
+        if (speedBox.getValue() == null) {
+            mediaPlayer.setRate(1);
+
+        } else {
+            mediaPlayer.setRate(
+                    Integer.parseInt(speedBox.getValue().substring(0, speedBox.getValue().length() - 1)) * 0.01);
+        }
+    }
+
+    public void beginTimer() {
+        timer = new Timer();
+        task = new TimerTask() {
+
+            public void run() {
+                running = true;
+                double current = mediaPlayer.getCurrentTime().toSeconds();
+                double end = media.getDuration().toSeconds();
+                songProgressBar.setProgress(current / end);
+
+                // set duration time
+                // FIXME
+
+                if (current / end == 1) {
+                    cancelTimer();
+                }
+            }
+        };
+        timer.scheduleAtFixedRate(task, 0, 1000);
+    }
+
+    public void cancelTimer() {
+        running = false;
+        timer.cancel();
+    }
+
     public void musicDetails(int musicNumber) {
         System.out.println("music number : " + musicNumber);
         Mp3File mp3file;
@@ -172,186 +373,15 @@ public class Controller implements Initializable {
         } catch (UnsupportedTagException | InvalidDataException | IOException ex) {
             ex.printStackTrace();
         }
-
     }
 
-    public void playMedia() {
+    public void alertError(String title, String content) {
         Alert alert = new Alert(AlertType.INFORMATION);
-        alert.setTitle("No Music in Queue");
+        alert.setTitle(title);
         alert.setHeaderText(null);
-        alert.setContentText("Please double click to select in list of music !");
+        alert.setContentText(content);
 
-        try {
-            if (mediaPlayer != null) {
-                if (running == false) {
-                    javafx.scene.image.Image image = new javafx.scene.image.Image(
-                            getClass().getResource("icons/pause.png").toExternalForm());
-                    ImageView iv = new ImageView(image);
-                    iv.setFitHeight(40);
-                    iv.setFitWidth(40);
-                    playButton.setGraphic(iv);
-
-                    beginTimer();
-                    changeSpeed(null);
-                    mediaPlayer.setVolume(volumeSlider.getValue() * 0.01);
-                    mediaPlayer.play();
-
-                } else {
-                    javafx.scene.image.Image image = new javafx.scene.image.Image(
-                            getClass().getResource("icons/play.png").toExternalForm());
-                    ImageView iv = new ImageView(image);
-                    iv.setFitHeight(40);
-                    iv.setFitWidth(40);
-                    playButton.setGraphic(iv);
-
-                    cancelTimer();
-                    mediaPlayer.pause();
-                }
-
-            } else {
-                alert.showAndWait();
-            }
-
-        } catch (Exception e) {
-            System.out.println("catch");
-            alert.showAndWait();
-        }
-
+        alert.showAndWait();
     }
 
-    public void stopMedia() {
-        songProgressBar.setProgress(0);
-        mediaPlayer.seek(Duration.seconds(0));
-    }
-
-    public void previousMedia() {
-
-        if (musicNumber > 0) {
-            musicNumber--;
-
-            mediaPlayer.stop();
-
-            if (running) {
-                cancelTimer();
-            }
-            media = new Media(music.get(musicNumber).toURI().toString());
-            mediaPlayer = new MediaPlayer(media);
-
-            musicDetails(musicNumber);
-            musicList.getSelectionModel().select(musicNumber);
-            musicList.getFocusModel().focus(musicNumber);
-            musicList.scrollTo(musicNumber);
-
-            musicLabel.setText(title);
-            artistLabel.setText(artist);
-
-            playMedia();
-
-        } else {
-            musicNumber = music.size() - 1;
-            mediaPlayer.stop();
-
-            if (running) {
-                cancelTimer();
-            }
-            media = new Media(music.get(musicNumber).toURI().toString());
-            mediaPlayer = new MediaPlayer(media);
-
-            musicDetails(musicNumber);
-            musicList.getSelectionModel().select(musicNumber);
-            musicList.getFocusModel().focus(musicNumber);
-            musicList.scrollTo(musicNumber);
-
-            musicLabel.setText(title);
-            artistLabel.setText(artist);
-
-            playMedia();
-        }
-    }
-
-    public void nextMedia() {
-        musicDetails(musicNumber);
-
-        if (musicNumber < music.size() - 1) {
-            musicNumber++;
-            mediaPlayer.stop();
-
-            if (running) {
-                cancelTimer();
-            }
-            media = new Media(music.get(musicNumber).toURI().toString());
-            mediaPlayer = new MediaPlayer(media);
-
-            musicDetails(musicNumber);
-            musicList.getSelectionModel().select(musicNumber);
-            musicList.getFocusModel().focus(musicNumber);
-            musicList.scrollTo(musicNumber);
-
-            musicLabel.setText(title);
-            artistLabel.setText(artist);
-
-            playMedia();
-
-        } else {
-            musicNumber = 0;
-            mediaPlayer.stop();
-            media = new Media(music.get(musicNumber).toURI().toString());
-            mediaPlayer = new MediaPlayer(media);
-
-            musicDetails(musicNumber);
-            musicList.getSelectionModel().select(musicNumber);
-            musicList.getFocusModel().focus(musicNumber);
-            musicList.scrollTo(musicNumber);
-
-            musicLabel.setText(title);
-            artistLabel.setText(artist);
-
-            playMedia();
-        }
-    }
-
-    public void shuffleMedia() {
-        System.out.println("Shuffle feature WIP"); // FIXME
-    }
-
-    public void loopMedia() {
-        System.out.println("Loop feature WIP");// FIXME
-    }
-
-    public void changeSpeed(ActionEvent event) {
-
-        if (speedBox.getValue() == null) {
-            mediaPlayer.setRate(1);
-
-        } else {
-            mediaPlayer.setRate(
-                    Integer.parseInt(speedBox.getValue().substring(0, speedBox.getValue().length() - 1)) * 0.01);
-        }
-    }
-
-    public void beginTimer() {
-        timer = new Timer();
-        task = new TimerTask() {
-
-            public void run() {
-                running = true;
-                double current = mediaPlayer.getCurrentTime().toSeconds();
-                double end = media.getDuration().toSeconds();
-                songProgressBar.setProgress(current / end);
-
-                // set duration time
-                // FIXME
-
-                if (current / end == 1) {
-                    cancelTimer();
-                }
-            }
-        };
-        timer.scheduleAtFixedRate(task, 0, 1000);
-    }
-
-    public void cancelTimer() {
-        running = false;
-        timer.cancel();
-    }
 }
