@@ -1,21 +1,30 @@
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import com.mpatric.mp3agic.ID3v2;
+import com.mpatric.mp3agic.InvalidDataException;
+import com.mpatric.mp3agic.Mp3File;
+import com.mpatric.mp3agic.UnsupportedTagException;
+
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Slider;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
@@ -27,7 +36,7 @@ public class Controller implements Initializable {
     @FXML
     private Pane pane;
     @FXML
-    private Label musicLabel, musicArtist, musicStartDuration, musicStopDuration;
+    private Label musicLabel, artistLabel, musicStartDuration, musicStopDuration;
     @FXML
     private Button playButton, previousButton, nextButton, shuffleButton, loopButton;
     @FXML
@@ -54,35 +63,7 @@ public class Controller implements Initializable {
     private TimerTask task;
 
     private boolean running;
-
-    public void handleMouseClick(MouseEvent e) {
-
-        if (e.getClickCount() == 2) {
-            musicNumber = musicList.getSelectionModel().getSelectedIndex();
-
-            if (mediaPlayer != null) {
-                mediaPlayer.stop();
-
-                if (running) {
-                    cancelTimer();
-                }
-            }
-
-            javafx.scene.image.Image image = new javafx.scene.image.Image(
-                    getClass().getResource("icons/pause.png").toExternalForm());
-            ImageView iv = new ImageView(image);
-            iv.setFitHeight(40);
-            iv.setFitWidth(40);
-
-            playButton.setGraphic(iv);
-
-            media = new Media(music.get(musicNumber).toURI().toString());
-            mediaPlayer = new MediaPlayer(media);
-            musicLabel.setText(music.get(musicNumber).getName());
-            playMedia();
-            System.out.println("clicked on " + musicList.getSelectionModel().getSelectedItem());
-        }
-    }
+    private String title, artist;
 
     @Override
     public void initialize(URL arg0, ResourceBundle arg1) {
@@ -120,31 +101,105 @@ public class Controller implements Initializable {
         songProgressBar.setStyle("-fx-accent: #900000;");
     }
 
-    public void playMedia() {
-        if (running == false) {
-            javafx.scene.image.Image image = new javafx.scene.image.Image(
-                    getClass().getResource("icons/pause.png").toExternalForm());
-            ImageView iv = new ImageView(image);
-            iv.setFitHeight(40);
-            iv.setFitWidth(40);
-            playButton.setGraphic(iv);
+    public void handleMouseClick(MouseEvent e) {
 
-            beginTimer();
-            changeSpeed(null);
-            mediaPlayer.setVolume(volumeSlider.getValue() * 0.01);
-            mediaPlayer.play();
+        if (e.getClickCount() == 2) {
+            musicNumber = musicList.getSelectionModel().getSelectedIndex();
 
-        } else {
-            javafx.scene.image.Image image = new javafx.scene.image.Image(
-                    getClass().getResource("icons/play.png").toExternalForm());
-            ImageView iv = new ImageView(image);
-            iv.setFitHeight(40);
-            iv.setFitWidth(40);
-            playButton.setGraphic(iv);
+            if (mediaPlayer != null) {
+                mediaPlayer.stop();
 
-            cancelTimer();
-            mediaPlayer.pause();
+                if (running) {
+                    cancelTimer();
+                }
+            }
+            musicDetails(musicNumber);
+
+            media = new Media(music.get(musicNumber).toURI().toString());
+            mediaPlayer = new MediaPlayer(media);
+            musicLabel.setText(title);
+            artistLabel.setText(artist);
+            playMedia();
+
+            System.out.println("clicked on " + musicList.getSelectionModel().getSelectedItem());
         }
+    }
+
+    public void musicDetails(int musicNumber) {
+        System.out.println("music number : " + musicNumber);
+        Mp3File mp3file;
+        ID3v2 id3v2Tag;
+        try {
+            mp3file = new Mp3File(files[musicNumber]);
+            if (mp3file.hasId3v2Tag()) {
+                id3v2Tag = mp3file.getId3v2Tag();
+
+                title = id3v2Tag.getTitle();
+                artist = id3v2Tag.getArtist();
+
+                System.out.println("========================================");
+                System.out.println("Artist: " + id3v2Tag.getArtist());
+                System.out.println("Title: " + id3v2Tag.getTitle());
+                System.out.println("Album: " + id3v2Tag.getAlbum());
+                System.out.println("Year: " + id3v2Tag.getYear());
+                System.out.println("========================================");
+
+                byte[] albumImageData = id3v2Tag.getAlbumImage();
+                if (albumImageData != null) {
+                    System.out.println("Have album image data, length: " + albumImageData.length + " bytes");
+                    System.out.println("Album image mime type: " + id3v2Tag.getAlbumImageMimeType());
+                }
+
+            }
+
+        } catch (UnsupportedTagException | InvalidDataException | IOException ex) {
+            ex.printStackTrace();
+        }
+
+    }
+
+    public void playMedia() {
+        Alert alert = new Alert(AlertType.INFORMATION);
+        alert.setTitle("No Music in Queue");
+        alert.setHeaderText(null);
+        alert.setContentText("Please double click to select in list of music !");
+
+        try {
+            if (mediaPlayer != null) {
+                if (running == false) {
+                    javafx.scene.image.Image image = new javafx.scene.image.Image(
+                            getClass().getResource("icons/pause.png").toExternalForm());
+                    ImageView iv = new ImageView(image);
+                    iv.setFitHeight(40);
+                    iv.setFitWidth(40);
+                    playButton.setGraphic(iv);
+
+                    beginTimer();
+                    changeSpeed(null);
+                    mediaPlayer.setVolume(volumeSlider.getValue() * 0.01);
+                    mediaPlayer.play();
+
+                } else {
+                    javafx.scene.image.Image image = new javafx.scene.image.Image(
+                            getClass().getResource("icons/play.png").toExternalForm());
+                    ImageView iv = new ImageView(image);
+                    iv.setFitHeight(40);
+                    iv.setFitWidth(40);
+                    playButton.setGraphic(iv);
+
+                    cancelTimer();
+                    mediaPlayer.pause();
+                }
+
+            } else {
+                alert.showAndWait();
+            }
+
+        } catch (Exception e) {
+            System.out.println("catch");
+            alert.showAndWait();
+        }
+
     }
 
     public void stopMedia() {
@@ -153,8 +208,10 @@ public class Controller implements Initializable {
     }
 
     public void previousMedia() {
+
         if (musicNumber > 0) {
             musicNumber--;
+
             mediaPlayer.stop();
 
             if (running) {
@@ -162,7 +219,15 @@ public class Controller implements Initializable {
             }
             media = new Media(music.get(musicNumber).toURI().toString());
             mediaPlayer = new MediaPlayer(media);
-            musicLabel.setText(music.get(musicNumber).getName());
+
+            musicDetails(musicNumber);
+            musicList.getSelectionModel().select(musicNumber);
+            musicList.getFocusModel().focus(musicNumber);
+            musicList.scrollTo(musicNumber);
+
+            musicLabel.setText(title);
+            artistLabel.setText(artist);
+
             playMedia();
 
         } else {
@@ -174,12 +239,21 @@ public class Controller implements Initializable {
             }
             media = new Media(music.get(musicNumber).toURI().toString());
             mediaPlayer = new MediaPlayer(media);
-            musicLabel.setText(music.get(musicNumber).getName());
+
+            musicDetails(musicNumber);
+            musicList.getSelectionModel().select(musicNumber);
+            musicList.getFocusModel().focus(musicNumber);
+            musicList.scrollTo(musicNumber);
+
+            musicLabel.setText(title);
+            artistLabel.setText(artist);
+
             playMedia();
         }
     }
 
     public void nextMedia() {
+        musicDetails(musicNumber);
 
         if (musicNumber < music.size() - 1) {
             musicNumber++;
@@ -190,7 +264,15 @@ public class Controller implements Initializable {
             }
             media = new Media(music.get(musicNumber).toURI().toString());
             mediaPlayer = new MediaPlayer(media);
-            musicLabel.setText(music.get(musicNumber).getName());
+
+            musicDetails(musicNumber);
+            musicList.getSelectionModel().select(musicNumber);
+            musicList.getFocusModel().focus(musicNumber);
+            musicList.scrollTo(musicNumber);
+
+            musicLabel.setText(title);
+            artistLabel.setText(artist);
+
             playMedia();
 
         } else {
@@ -198,7 +280,15 @@ public class Controller implements Initializable {
             mediaPlayer.stop();
             media = new Media(music.get(musicNumber).toURI().toString());
             mediaPlayer = new MediaPlayer(media);
-            musicLabel.setText(music.get(musicNumber).getName());
+
+            musicDetails(musicNumber);
+            musicList.getSelectionModel().select(musicNumber);
+            musicList.getFocusModel().focus(musicNumber);
+            musicList.scrollTo(musicNumber);
+
+            musicLabel.setText(title);
+            artistLabel.setText(artist);
+
             playMedia();
         }
     }
