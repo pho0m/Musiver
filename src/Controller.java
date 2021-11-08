@@ -359,27 +359,77 @@ public class Controller implements Initializable {
         }
     }
 
+    double current;
+    double end;
+
     public void beginTimer() {
         timer = new Timer();
         task = new TimerTask() {
 
             public void run() {
                 running = true;
-                double current = mediaPlayer.getCurrentTime().toSeconds();
-                double end = media.getDuration().toSeconds();
+                current = mediaPlayer.getCurrentTime().toSeconds();
+                end = media.getDuration().toSeconds();
                 musicProgressBar.setProgress(current / end);
 
                 if (current / end == 1) {
                     cancelTimer();
                 }
             }
+
         };
+        mediaPlayer.currentTimeProperty().addListener(new ChangeListener<>() {
+
+            @Override
+            public void changed(ObservableValue<? extends Duration> observable, Duration oldTime, Duration newTime) {
+                current = mediaPlayer.getCurrentTime().toMillis();
+                end = media.getDuration().toMillis();
+
+                musicStartDuration.setText("" + milliSecondsToTimer(current));
+                musicStopDuration.setText("" + milliSecondsToTimer(end));
+
+            }
+
+        });
+
         timer.scheduleAtFixedRate(task, 0, 1000);
     }
 
     public void cancelTimer() {
         running = false;
         timer.cancel();
+    }
+
+    /**
+     * Function to convert milliseconds time to Timer Format Hours:Minutes:Seconds
+     */
+    public String milliSecondsToTimer(Double milliseconds) {
+        String finalTimerString = "";
+        String secondsString = "";
+        String minutesString = "";
+
+        // Convert total duration into time
+        int minutes = (int) (milliseconds % (1000 * 60 * 60)) / (1000 * 60);
+        int seconds = (int) ((milliseconds % (1000 * 60 * 60)) % (1000 * 60) / 1000);
+
+        // Prepending 0 to seconds if it is one digit
+        if (seconds < 10) {
+            secondsString = "0" + seconds;
+        } else {
+            secondsString = "" + seconds;
+        }
+
+        // Prepending 0 to seconds if it is one digit
+        if (minutes < 10) {
+            minutesString = "0" + minutes;
+        } else {
+            minutesString = "" + minutes;
+        }
+
+        finalTimerString = finalTimerString + minutesString + ":" + secondsString;
+
+        // return timer string
+        return finalTimerString;
     }
 
     public void musicDetails(int musicNumber) {
@@ -392,8 +442,15 @@ public class Controller implements Initializable {
             if (mp3file.hasId3v2Tag()) {
                 id3v2Tag = mp3file.getId3v2Tag();
 
-                title = id3v2Tag.getTitle();
+                title = musicList.getItems().get(musicNumber).toString();
+                if (title == null) {
+                    title = "No Title";
+                }
+
                 artist = id3v2Tag.getArtist();
+                if (artist == null) {
+                    artist = "No Artist";
+                }
 
                 byte[] albumImageData = id3v2Tag.getAlbumImage();
                 if (albumImageData != null) {
