@@ -90,7 +90,7 @@
             <Insets />
          </opaqueInsets>
       </Label>
-      <ImageView fitHeight="167.0" fitWidth="166.0" layoutX="106.0" layoutY="22.0" pickOnBounds="true" preserveRatio="true">
+      <ImageView fx:id="musicImage" fitHeight="167.0" fitWidth="166.0" layoutX="106.0" layoutY="22.0" pickOnBounds="true" preserveRatio="true">
          <image>
             <Image url="@icons/music-placeholder.png" />
          </image>

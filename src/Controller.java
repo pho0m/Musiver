@@ -1,5 +1,7 @@
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -25,6 +27,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
@@ -47,6 +50,8 @@ public class Controller implements Initializable {
     private ProgressBar songProgressBar;
     @FXML
     private ListView<String> musicList;
+    @FXML
+    private ImageView musicImage;
 
     private Media media;
     private MediaPlayer mediaPlayer;
@@ -129,6 +134,7 @@ public class Controller implements Initializable {
         System.out.println("music number : " + musicNumber);
         Mp3File mp3file;
         ID3v2 id3v2Tag;
+
         try {
             mp3file = new Mp3File(files[musicNumber]);
             if (mp3file.hasId3v2Tag()) {
@@ -146,8 +152,19 @@ public class Controller implements Initializable {
 
                 byte[] albumImageData = id3v2Tag.getAlbumImage();
                 if (albumImageData != null) {
+                    Image img = new Image(new ByteArrayInputStream(albumImageData));
+                    musicImage.setImage(img);
+                    musicImage.setFitWidth(166);
+                    musicImage.setFitHeight(167);
+
                     System.out.println("Have album image data, length: " + albumImageData.length + " bytes");
                     System.out.println("Album image mime type: " + id3v2Tag.getAlbumImageMimeType());
+                } else {
+                    javafx.scene.image.Image image = new javafx.scene.image.Image(
+                            getClass().getResource("icons/music-placeholder.png").toExternalForm());
+                    musicImage.setFitWidth(166);
+                    musicImage.setFitHeight(167);
+                    musicImage.setImage(image);
                 }
 
             }
