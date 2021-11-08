@@ -68,8 +68,9 @@ public class Controller implements Initializable {
     private Timer timer;
     private TimerTask task;
 
-    private boolean running;
+    private boolean running, loop;
     private String title, artist;
+    private double fitWidth, fitHeight;
 
     @Override
     public void initialize(URL arg0, ResourceBundle arg1) {
@@ -104,7 +105,10 @@ public class Controller implements Initializable {
             }
         });
 
-        songProgressBar.setStyle("-fx-accent: #900000;");
+        fitWidth = 30;
+        fitHeight = 30;
+        loop = false;
+        songProgressBar.setStyle("-fx-accent: #000080;");
     }
 
     public void handleMouseClick(MouseEvent e) {
@@ -146,6 +150,19 @@ public class Controller implements Initializable {
                     changeSpeed(null);
                     mediaPlayer.setVolume(volumeSlider.getValue() * 0.01);
                     mediaPlayer.play();
+
+                    mediaPlayer.setOnEndOfMedia(new Runnable() {
+                        public void run() {
+                            if (loop == true) {
+                                songProgressBar.setProgress(0);
+                                mediaPlayer.seek(Duration.seconds(0));
+                                mediaPlayer.play();
+
+                            } else {
+                                nextMedia();
+                            }
+                        }
+                    });
 
                 } else {
                     javafx.scene.image.Image image = new javafx.scene.image.Image(
@@ -256,13 +273,9 @@ public class Controller implements Initializable {
         musicNumber = rnd;
 
         if (mediaPlayer != null) {
-            if (mediaPlayer != null) {
-                mediaPlayer.stop();
+            mediaPlayer.stop();
 
-                if (running) {
-                    cancelTimer();
-                }
-            }
+            cancelTimer();
 
             media = new Media(music.get(musicNumber).toURI().toString());
             mediaPlayer = new MediaPlayer(media);
@@ -280,7 +293,29 @@ public class Controller implements Initializable {
     }
 
     public void loopMedia() {
-        System.out.println("Loop feature WIP");// FIXME
+        if (mediaPlayer != null) {
+            if (loop == false) {
+                loop = true;
+                javafx.scene.image.Image image = new javafx.scene.image.Image(
+                        getClass().getResource("icons/refresh.png").toExternalForm());
+                ImageView iv = new ImageView(image);
+                iv.setFitHeight(fitHeight);
+                iv.setFitWidth(fitWidth);
+                iv.setOpacity(0.25);
+                loopButton.setGraphic(iv);
+            } else {
+                loop = false;
+                javafx.scene.image.Image image = new javafx.scene.image.Image(
+                        getClass().getResource("icons/refresh.png").toExternalForm());
+                ImageView iv = new ImageView(image);
+                iv.setFitHeight(fitHeight);
+                iv.setFitWidth(fitWidth);
+                loopButton.setGraphic(iv);
+            }
+
+        } else {
+            alertError("No Music in Queue", "Please double click to select in list of music !");
+        }
     }
 
     public void stopMedia() {
@@ -365,6 +400,7 @@ public class Controller implements Initializable {
                             getClass().getResource("icons/music-placeholder.png").toExternalForm());
                     musicImage.setFitWidth(166);
                     musicImage.setFitHeight(167);
+                    musicImage.setPreserveRatio(true);
                     musicImage.setImage(image);
                 }
 
