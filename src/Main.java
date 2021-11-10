@@ -1,3 +1,11 @@
+/*
+* Project Name: Musiver 
+* Team:
+* 1. Kiattiphoom Poonketkit 6402041520031
+* 2. Sasithon Saelao        6402041520162
+* Section : TCT 1 RA
+*/
+
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.stage.Stage;
