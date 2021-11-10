@@ -15,4 +15,4 @@ use JavaFx 17
 "vmArgs": "--module-path [PATH OF JAVAFX]javafx-sdk-17.0.0.1/lib --add-modules javafx.controls,javafx.fxml,javafx.media",
 ````
 
-![alt text](musiver.jpg)
+![alt text](images/musiver.jpg)
